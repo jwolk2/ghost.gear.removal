@@ -32,26 +32,19 @@ registry = GameScreenRegistry()
 # Registering screens in the order they should be displayed
 registry.register(
     choices=[
-        Choice(text="Option A", color=ButtonColor.GREEN, location=ButtonLocation.RIGHT),
-        Choice(text="Option B", color=ButtonColor.BLUE, location=ButtonLocation.LEFT),
-        Choice(text="Option C", color=ButtonColor.RED, location=ButtonLocation.TOP),
+        Choice(text="In between low and high tide", color=ButtonColor.GREEN, location=ButtonLocation.RIGHT),
+        Choice(text="1 Hour before low or high tide", color=ButtonColor.BLUE, location=ButtonLocation.LEFT),
+        Choice(text="Right at low or high tide", color=ButtonColor.RED, location=ButtonLocation.TOP),
     ],
-    question="What would you like to do first?",
+    question="When should you start the mission to give the ROV the most time before currents increase?",
     sprites=[
-        ImageSprite(
-            x=cfg.FISH_X,
-            y=cfg.FISH_Y,
-            image=cfg.FISH_IMAGE,
-            width=cfg.FISH_WIDTH,
-            rotation=cfg.FISH_ROTATION,
-        )
     ],
 )
 registry.register(
     choices=[
-        Choice(text="Option A", color=ButtonColor.GREEN, location=ButtonLocation.RIGHT),
-        Choice(text="Option B", color=ButtonColor.BLUE, location=ButtonLocation.LEFT),
+        Choice(text="First, attach the buoys to lift the net", color=ButtonColor.GREEN, location=ButtonLocation.RIGHT),
+        Choice(text="First, cut the net", color=ButtonColor.BLUE, location=ButtonLocation.LEFT),
     ],
-    question="What would you like to do next?",
+    question="What do you want to do first with the ROV?",
     sprites=[],
 )

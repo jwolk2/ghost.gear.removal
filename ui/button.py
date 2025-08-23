@@ -1,7 +1,9 @@
+import math
 from typing import Optional
 import pygame
 from config import core
-from states.base import TextPosition
+from states.base import TextAlign, TextPosition
+from utils.draw_text import wrap_text
 
 
 class Button:
@@ -21,6 +23,9 @@ class Button:
         sprite_hover: Optional[pygame.Surface] = None,
         text_position: TextPosition = "center",
         text_margin: int = 10,
+        wrap_text_width: Optional[int] = None,
+        text_align: TextAlign = "left",
+        pulse_text: bool = False,
     ) -> None:
         if font is None:
             font = pygame.font.Font(core.DEFAULT_FONT, core.DEFAULT_BUTTON_FONT_SIZE)
@@ -34,6 +39,15 @@ class Button:
         self.y = y
         self.sprite = sprite
         self.sprite_hover = sprite_hover
+        self.wrap_text_width = wrap_text_width
+        self.text_align = text_align
+
+        self.pulse_text = pulse_text
+        self.pulse_time = 0.0
+        self.pulse_speed = 2.5
+        self.pulse_min_alpha = 50
+        self.pulse_max_alpha = 255
+        self.current_alpha = 255
 
         if sprite is None:
             self.rect = pygame.Rect(x, y, width, height)
@@ -58,8 +72,28 @@ class Button:
         self._update_text_rect()
 
     def _update_text_rect(self) -> None:
-        self.text_surface = self.font.render(self.text, True, self.text_color)
-        text_rect = self.text_surface.get_rect()
+        if self.wrap_text_width:
+            lines = wrap_text(self.text, self.font, self.wrap_text_width)
+            line_surfaces = [self.font.render(line, True, self.text_color) for line in lines]
+            width = max(s.get_width() for s in line_surfaces)
+            height = sum(s.get_height() for s in line_surfaces)
+            self.text_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+            y = 0
+            for s in line_surfaces:
+                if self.text_align == "center":
+                    x = (width - s.get_width()) // 2
+                elif self.text_align == "right":
+                    x = width - s.get_width()
+                else:  # "left" or fallback
+                    x = 0
+                s.set_alpha(self.current_alpha)
+                self.text_surface.blit(s, (x, y))
+                y += s.get_height()
+            text_rect = self.text_surface.get_rect()
+        else:
+            self.text_surface = self.font.render(self.text, True, self.text_color)
+            self.text_surface.set_alpha(self.current_alpha)
+            text_rect = self.text_surface.get_rect()
 
         # Anchor text based on position relative to button
         if self.text_position == "center":
@@ -98,6 +132,16 @@ class Button:
             self.text_rect.top = self.rect.bottom + self.text_margin
         else:
             raise ValueError(f"Unknown text_position: {self.text_position}")
+        
+    def update_pulse(self, dt: float) -> None:
+        if self.pulse_text:
+            self.pulse_time += dt * self.pulse_speed
+            pulse = (math.sin(self.pulse_time) + 1) / 2  # Range [0, 1]
+            alpha = int(self.pulse_min_alpha + pulse * (self.pulse_max_alpha - self.pulse_min_alpha))
+            self.current_alpha = alpha
+        else:
+            self.current_alpha = 255
+        self._update_text_rect()
 
     def draw(self, surface: pygame.Surface) -> None:
         if self.sprite:
@@ -125,6 +169,21 @@ class Button:
                 self.hovered = False
         else:
             self.hovered = self.rect.collidepoint(mouse_pos)
+
+        if not hasattr(self, "_last_tick"):
+            self._last_tick = pygame.time.get_ticks()
+        now = pygame.time.get_ticks()
+        dt = (now - self._last_tick) / 1000.0
+        self._last_tick = now
+
+        if self.pulse_text:
+            self.pulse_time += dt * self.pulse_speed
+            pulse = (math.sin(self.pulse_time) + 1) / 2
+            alpha = int(self.pulse_min_alpha + pulse * (self.pulse_max_alpha - self.pulse_min_alpha))
+            self.current_alpha = alpha
+        else:
+            self.current_alpha = 255
+
         self._update_text_rect()
 
     def handle_event(self, event: pygame.event.Event) -> bool:

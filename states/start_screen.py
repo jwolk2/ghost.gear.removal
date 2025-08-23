@@ -23,8 +23,11 @@ class StartScreen(BaseState):
             text=cfg.START_BUTTON_TEXT,
             font=self.font,
             text_color=cfg.START_BUTTON_TEXT_COLOR,
-            sprite=pygame.image.load(core.GREEN_BUTTON).convert_alpha(),
-            sprite_hover=pygame.image.load(core.GREEN_BUTTON_HOVER).convert_alpha(),
+            sprite=pygame.image.load(core.RED_BUTTON).convert_alpha(),
+            sprite_hover=pygame.image.load(core.RED_BUTTON_HOVER).convert_alpha(),
+            text_position="top-outside",
+            text_margin=cfg.START_BUTTON_TEXT_MARGIN,
+            pulse_text=True
         )
 
         self.title_text = TextBox(
@@ -32,6 +35,17 @@ class StartScreen(BaseState):
             y=cfg.TITLE_TEXT_Y,
             text=cfg.TITLE_TEXT,
             font=pygame.font.Font(core.TITLE_FONT, cfg.TITLE_TEXT_FONT_SIZE),
+            text_color=cfg.START_TEXT_COLOR,
+            wrap_text_width=cfg.TITLE_TEXT_WRAP_WIDTH,
+            text_align=cfg.TITLE_TEXT_ALIGN,
+        )
+
+        self.background = ImageSprite(
+            x=cfg.BACKGROUND_OFFSET_X,
+            y=0,
+            image=cfg.BACKGROUND_IMAGE,
+            width=core.SCREEN_WIDTH,
+            height=core.SCREEN_HEIGHT,
         )
 
     def handle_event(self, event: Event) -> None:
@@ -40,6 +54,7 @@ class StartScreen(BaseState):
 
     def draw(self, screen: Surface) -> None:
         screen.fill(cfg.START_BG_COLOR)
+        self.background.draw(screen)
         self.title_text.draw(screen)
         self.button.draw(screen)
 

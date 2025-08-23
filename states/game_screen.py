@@ -54,7 +54,9 @@ class GameScreen(BaseState):
                         core.RED_BUTTON_HOVER
                     ).convert_alpha(),
                     text_position=LOCATION_ALIGNMENT[choice.location],
-                    font=button_font
+                    font=button_font,
+                    wrap_text_width=cfg.BUTTON_TEXT_WRAP_WIDTH,
+                    text_align=cfg.BUTTON_TEXT_ALIGN
                 )
             elif choice.color == ButtonColor.GREEN:
                 self.buttons[choice.location] = Button(
@@ -67,7 +69,9 @@ class GameScreen(BaseState):
                         core.GREEN_BUTTON_HOVER
                     ).convert_alpha(),
                     text_position=LOCATION_ALIGNMENT[choice.location],
-                    font=button_font
+                    font=button_font,
+                    wrap_text_width=cfg.BUTTON_TEXT_WRAP_WIDTH,
+                    text_align=cfg.BUTTON_TEXT_ALIGN
                 )
             elif choice.color == ButtonColor.BLUE:
                 self.buttons[choice.location] = Button(
@@ -80,7 +84,9 @@ class GameScreen(BaseState):
                         core.BLUE_BUTTON_HOVER
                     ).convert_alpha(),
                     text_position=LOCATION_ALIGNMENT[choice.location],
-                    font=button_font
+                    font=button_font,
+                    wrap_text_width=cfg.BUTTON_TEXT_WRAP_WIDTH,
+                    text_align=cfg.BUTTON_TEXT_ALIGN
                 )
             else:
                 raise ValueError(
@@ -93,6 +99,8 @@ class GameScreen(BaseState):
             text=question,
             font_size=cfg.QUESTION_TEXT_FONT_SIZE,
             font=pygame.font.Font(core.HEADING_FONT, cfg.QUESTION_TEXT_FONT_SIZE),
+            wrap_text_width=cfg.QUESTION_TEXT_WRAP_WIDTH,
+            text_align=cfg.QUESTION_TEXT_ALIGN,
         )
 
         self.sprites = sprites

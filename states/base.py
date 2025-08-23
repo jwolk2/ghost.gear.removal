@@ -55,3 +55,5 @@ TextPosition = Literal[
     "top-outside",
     "bottom-outside",
 ]
+
+TextAlign = Literal["left", "center", "right"]

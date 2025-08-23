@@ -12,7 +12,7 @@ DARK_BLUE_HOVER = (70, 70, 240)
 TRANSPARENT = (0, 0, 0, 0)
 
 # Default font
-DEFAULT_FONT = "assets/fonts/IBMPlexSans-Regular.ttf"
+DEFAULT_FONT = "assets/fonts/Menlo.ttc"
 TITLE_FONT = "assets/fonts/Bungee-Regular.ttf"
 HEADING_FONT = "assets/fonts/norwester.otf"
 
