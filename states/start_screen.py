@@ -31,7 +31,7 @@ class StartScreen(BaseState):
             x=cfg.TITLE_TEXT_X,
             y=cfg.TITLE_TEXT_Y,
             text=cfg.TITLE_TEXT,
-            font_size=cfg.TITLE_TEXT_FONT_SIZE,
+            font=pygame.font.Font(core.TITLE_FONT, cfg.TITLE_TEXT_FONT_SIZE),
         )
 
     def handle_event(self, event: Event) -> None:

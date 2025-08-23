@@ -2,7 +2,7 @@ import pygame
 from config import core as cfg
 
 pygame.init()
-screen = pygame.display.set_mode((cfg.SCREEN_WIDTH, cfg.SCREEN_HEIGHT))
+screen = pygame.display.set_mode((cfg.SCREEN_WIDTH, cfg.SCREEN_HEIGHT), pygame.FULLSCREEN)
 pygame.display.set_caption("Ghost Gear Removal")
 
 
