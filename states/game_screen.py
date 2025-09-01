@@ -1,6 +1,7 @@
 from typing import Any
 import pygame
 from config import core, game as cfg
+from states.audio_player import AudioPlayer
 from states.base import (
     BaseState,
     ButtonColor,
@@ -19,11 +20,13 @@ LOCATION_ALIGNMENT: dict[ButtonLocation, TextPosition] = {
     ButtonLocation.RIGHT: "right-outside",
 }
 
+channel = 0
 
 class GameScreen(BaseState):
     def __init__(
-        self, choices: list[Choice], question: str, sprites: list[ImageSprite]
+        self, choices: list[Choice], question: str, sprites: list[ImageSprite], sound: str,
     ) -> None:
+        global channel
         super().__init__()
 
         if len(choices) < 1:
@@ -105,12 +108,18 @@ class GameScreen(BaseState):
 
         self.sprites = sprites
 
-    def handle_event(self, event: Any) -> None:
+        channel += 1
+        self.sound_player = AudioPlayer(narration_sound=sound, channel=channel, repeat=core.REPEAT_NARRATION, repeat_interval=core.REPEAT_NARRATION_DELAY)
+        self.sound_started = False
+
+    def handle_event(self, event: Any) -> bool:
         for button in self.buttons.values():
             if button.handle_event(event):
                 self.next_state = StateName.GAME
                 self.selection = button.text
-                break
+                self.sound_player.reset()
+                return True
+        return False
 
     def draw(self, screen: pygame.Surface) -> None:
         screen.fill(cfg.GAME_BG_COLOR)
@@ -121,6 +130,16 @@ class GameScreen(BaseState):
             button.draw(screen)
 
     def update(self) -> None:
+        if not self.sound_started:
+            self.sound_player.play()
+            self.sound_started = True
+        self.sound_player.update()
         mouse_pos = pygame.mouse.get_pos()
         for button in self.buttons.values():
             button.update(mouse_pos)
+
+    def reset(self) -> None:
+        self.next_state = None
+        self.selection = None
+        self.sound_player.reset()
+        self.sound_started = False

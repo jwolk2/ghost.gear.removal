@@ -3,11 +3,11 @@ from pygame.surface import Surface
 from pygame.event import Event
 from config import start as cfg
 from config import core
+from states.audio_player import AudioPlayer
 from states.base import BaseState, StateName
 from ui.button import Button
 from ui.sprite import ImageSprite
 from ui.text import TextBox
-from utils.draw_text import draw_text
 
 
 class StartScreen(BaseState):
@@ -48,9 +48,16 @@ class StartScreen(BaseState):
             height=core.SCREEN_HEIGHT,
         )
 
-    def handle_event(self, event: Event) -> None:
+        self.sound = core.START_SCREEN_NARRATION
+        self.sound_player = AudioPlayer(narration_sound=self.sound, channel=0, repeat=core.REPEAT_NARRATION, repeat_interval=core.REPEAT_NARRATION_DELAY)
+        self.sound_started = False
+
+    def handle_event(self, event: Event) -> bool:
         if self.button.handle_event(event):
             self.next_state = StateName.GAME
+            self.sound_player.reset()
+            return True
+        return False
 
     def draw(self, screen: Surface) -> None:
         screen.fill(cfg.START_BG_COLOR)
@@ -59,5 +66,14 @@ class StartScreen(BaseState):
         self.button.draw(screen)
 
     def update(self) -> None:
+        if not self.sound_started:
+            self.sound_player.play()
+            self.sound_started = True
+        self.sound_player.update()
         mouse_pos = pygame.mouse.get_pos()
         self.button.update(mouse_pos)
+
+    def reset(self) -> None:
+        self.next_state = None
+        self.sound_player.reset()
+        self.sound_started = False

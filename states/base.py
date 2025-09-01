@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Any, Literal, Optional
 
+import pygame
+
 
 class StateName(Enum):
     START = auto()
@@ -23,9 +25,10 @@ class ButtonLocation(Enum):
 class BaseState(ABC):
     def __init__(self) -> None:
         self.next_state: Optional[StateName] = None
+        self.sound: Optional[str] = None
 
     @abstractmethod
-    def handle_event(self, event: Any) -> None:
+    def handle_event(self, event: Any) -> bool:
         pass
 
     @abstractmethod

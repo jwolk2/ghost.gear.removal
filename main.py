@@ -1,3 +1,4 @@
+import time
 import pygame
 from config import core as cfg
 
@@ -12,20 +13,38 @@ from states.base import StateName
 from states.manager import GameScreenManager
 from states.start_screen import StartScreen
 from states.game_screen import GameScreen
+from states.video_screen import VideoScreen
 
 clock = pygame.time.Clock()
 
 # State management
-current_state = StartScreen()
+start_screen = StartScreen()
+current_state = start_screen
 game_screen_manager = GameScreenManager()
 game_started = False
 
+last_interaction_time = time.time()
+
 while True:
+    current_time = time.time()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        current_state.handle_event(event)
+        state_flag = current_state.handle_event(event)
+        if state_flag:
+            last_interaction_time = current_time
+    
+    # Check for inactivity
+    if current_time - last_interaction_time > cfg.INACTIVITY_TIMEOUT:
+        # Timeout: reset to StartScreen
+        current_state.reset()
+        game_screen_manager.reset()
+        start_screen.reset()
+        current_state = start_screen
+        game_started = False
+        last_interaction_time = current_time
 
     current_state.update()
     current_state.draw(screen)
@@ -33,19 +52,25 @@ while True:
     if current_state.next_state:
         if current_state.next_state == StateName.GAME:
             if not game_started:
+                # Show the first game screen
                 current_state = game_screen_manager.get_current_screen()
                 game_started = True
             else:
-                next_state = game_screen_manager.get_next_screen()
-
-                # If the next state is the same as the current state, it means we are at the end of the game screens.
-                # In that case, we reset the next_state to prevent any logical errors.
-                if next_state != current_state:
-                    current_state = next_state
-                else:
-                    # TODO: Start the video playback
-                    current_state.next_state = None
+                # Only advance if a selection was made
+                if hasattr(current_state, "selection") and current_state.selection:
+                    next_state = game_screen_manager.get_next_screen()
+                    if next_state != current_state:
+                        current_state = next_state
+                    else:
+                        # End of game screens: resolve video
+                        video_path = game_screen_manager.resolve_video()
+                        current_state = VideoScreen(video_path)
         else:
-            current_state = StartScreen()
+            current_state.reset()
+            game_screen_manager.reset()
+            start_screen.reset()
+            current_state = start_screen
+            game_started = False
+            last_interaction_time = time.time()
     pygame.display.flip()
     clock.tick(cfg.FPS)

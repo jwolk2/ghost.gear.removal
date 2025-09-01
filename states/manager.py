@@ -1,4 +1,5 @@
-from states.base import Choice
+import os
+from config import choices
 from states.game_screen import GameScreen
 from states.registry import registry
 
@@ -20,12 +21,12 @@ class GameScreenManager:
             GameScreen: The next game screen or the current one if at the end.
         """
         next = self._current.next
+        self._selections.append(self._current.data.selection)
         if next is not None:
             if not self._current.data.selection:
                 raise ValueError(
                     "Current screen selection is None. Ensure a choice is made before proceeding."
                 )
-            self._selections.append(self._current.data.selection)
             self._current = next
             return next.data
         return self.get_current_screen()
@@ -48,3 +49,24 @@ class GameScreenManager:
             self._selections.remove(self._current.data.selection)
             return prev.data
         return self.get_current_screen()
+    
+    def resolve_video(self) -> str:
+        """
+        Resolve the video file path based on the selections made in the game screens.
+
+        Returns:
+            str: The file path of the video to be played.
+        """
+        if not self._selections:
+            raise ValueError("No selections made. Cannot resolve video.")
+        
+        video_path = choices.video_path(self._selections)
+        
+        assert os.path.exists(video_path), f"Video file does not exist: {video_path}"
+        return video_path
+    
+    def reset(self) -> None:
+        """Reset selections and current screen to the first."""
+        self._selections.clear()
+        self._current = registry.first()
+        registry.reset()
