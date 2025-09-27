@@ -3,6 +3,7 @@ from pygame.surface import Surface
 from pygame.event import Event
 from config import start as cfg
 from config import core
+from hardware.i2c import set_led
 from states.audio_player import AudioPlayer
 from states.base import BaseState, StateName
 from ui.button import Button
@@ -27,7 +28,8 @@ class StartScreen(BaseState):
             sprite_hover=pygame.image.load(core.RED_BUTTON_HOVER).convert_alpha(),
             text_position="top-outside",
             text_margin=cfg.START_BUTTON_TEXT_MARGIN,
-            pulse_text=True
+            pulse_text=True,
+            button_id=core.RED_BUTTON_ID
         )
 
         self.title_text = TextBox(
@@ -51,6 +53,8 @@ class StartScreen(BaseState):
         self.sound = core.START_SCREEN_NARRATION
         self.sound_player = AudioPlayer(narration_sound=self.sound, channel=0, repeat=core.REPEAT_NARRATION, repeat_interval=core.REPEAT_NARRATION_DELAY)
         self.sound_started = False
+        self.enabled_leds = [core.RED_BUTTON_LED_ID]
+        self.other_leds = [led for led in self.leds or [] if led not in self.enabled_leds]
 
     def handle_event(self, event: Event) -> bool:
         if self.button.handle_event(event):
@@ -72,6 +76,10 @@ class StartScreen(BaseState):
         self.sound_player.update()
         mouse_pos = pygame.mouse.get_pos()
         self.button.update(mouse_pos)
+        for led in self.enabled_leds:
+            set_led(led, True)
+        for led in self.other_leds:
+            set_led(led, False)
 
     def reset(self) -> None:
         self.next_state = None

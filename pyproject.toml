@@ -5,6 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "adafruit-blinka>=8.66.1",
+    "adafruit-circuitpython-seesaw>=1.16.7",
     "pygame>=2.6.1",
     "pyvidplayer2>=0.9.27",
+    "rpi-lgpio>=0.6",
 ]

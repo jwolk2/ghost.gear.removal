@@ -1,6 +1,7 @@
 from typing import Any
 import pygame
 from config import core, game as cfg
+from hardware.i2c import set_led
 from states.audio_player import AudioPlayer
 from states.base import (
     BaseState,
@@ -40,6 +41,7 @@ class GameScreen(BaseState):
 
         button_font = pygame.font.Font(core.HEADING_FONT, cfg.BUTTON_TEXT_FONT_SIZE)
 
+        self.enabled_leds = []
         self.buttons: dict[ButtonLocation, Button] = {}
         for choice in choices:
             if choice.location in self.buttons:
@@ -59,8 +61,10 @@ class GameScreen(BaseState):
                     text_position=LOCATION_ALIGNMENT[choice.location],
                     font=button_font,
                     wrap_text_width=cfg.BUTTON_TEXT_WRAP_WIDTH,
-                    text_align=cfg.BUTTON_TEXT_ALIGN
+                    text_align=cfg.BUTTON_TEXT_ALIGN,
+                    button_id=core.RED_BUTTON_ID
                 )
+                self.enabled_leds.append(core.RED_BUTTON_LED_ID)
             elif choice.color == ButtonColor.GREEN:
                 self.buttons[choice.location] = Button(
                     x=cfg.RIGHT_BUTTON_X,
@@ -74,8 +78,10 @@ class GameScreen(BaseState):
                     text_position=LOCATION_ALIGNMENT[choice.location],
                     font=button_font,
                     wrap_text_width=cfg.BUTTON_TEXT_WRAP_WIDTH,
-                    text_align=cfg.BUTTON_TEXT_ALIGN
+                    text_align=cfg.BUTTON_TEXT_ALIGN,
+                    button_id=core.GREEN_BUTTON_ID
                 )
+                self.enabled_leds.append(core.GREEN_BUTTON_LED_ID)
             elif choice.color == ButtonColor.BLUE:
                 self.buttons[choice.location] = Button(
                     x=cfg.LEFT_BUTTON_X,
@@ -89,8 +95,10 @@ class GameScreen(BaseState):
                     text_position=LOCATION_ALIGNMENT[choice.location],
                     font=button_font,
                     wrap_text_width=cfg.BUTTON_TEXT_WRAP_WIDTH,
-                    text_align=cfg.BUTTON_TEXT_ALIGN
+                    text_align=cfg.BUTTON_TEXT_ALIGN,
+                    button_id=core.BLUE_BUTTON_ID
                 )
+                self.enabled_leds.append(core.BLUE_BUTTON_LED_ID)
             else:
                 raise ValueError(
                     f"Unsupported button color option: {choice.color}. The supported colors are: {list(ButtonColor)}."
@@ -111,6 +119,7 @@ class GameScreen(BaseState):
         channel += 1
         self.sound_player = AudioPlayer(narration_sound=sound, channel=channel, repeat=core.REPEAT_NARRATION, repeat_interval=core.REPEAT_NARRATION_DELAY)
         self.sound_started = False
+        self.other_leds = [led for led in self.leds or [] if led not in self.enabled_leds]
 
     def handle_event(self, event: Any) -> bool:
         for button in self.buttons.values():
@@ -137,6 +146,10 @@ class GameScreen(BaseState):
         mouse_pos = pygame.mouse.get_pos()
         for button in self.buttons.values():
             button.update(mouse_pos)
+        for led in self.enabled_leds:
+            set_led(led, True)
+        for led in self.other_leds:
+            set_led(led, False)
 
     def reset(self) -> None:
         self.next_state = None

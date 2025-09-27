@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Any, Literal, Optional
+from config import core
 
 import pygame
 
@@ -26,6 +27,7 @@ class BaseState(ABC):
     def __init__(self) -> None:
         self.next_state: Optional[StateName] = None
         self.sound: Optional[str] = None
+        self.leds: Optional[list[int]] = [core.RED_BUTTON_LED_ID, core.BLUE_BUTTON_LED_ID, core.GREEN_BUTTON_LED_ID]
 
     @abstractmethod
     def handle_event(self, event: Any) -> bool:

@@ -2,6 +2,7 @@ import math
 from typing import Optional
 import pygame
 from config import core
+from hardware.i2c import I2C_BUTTON_RELEASE_EVENT
 from states.base import TextAlign, TextPosition
 from utils.draw_text import wrap_text
 
@@ -26,6 +27,7 @@ class Button:
         wrap_text_width: Optional[int] = None,
         text_align: TextAlign = "left",
         pulse_text: bool = False,
+        button_id: Optional[int] = None,
     ) -> None:
         if font is None:
             font = pygame.font.Font(core.DEFAULT_FONT, core.DEFAULT_BUTTON_FONT_SIZE)
@@ -41,6 +43,7 @@ class Button:
         self.sprite_hover = sprite_hover
         self.wrap_text_width = wrap_text_width
         self.text_align = text_align
+        self.button_id = button_id
 
         self.pulse_text = pulse_text
         self.pulse_time = 0.0
@@ -192,6 +195,10 @@ class Button:
                 self.clicked = True
         elif event.type == pygame.MOUSEBUTTONUP:
             if self.clicked and self.hovered and event.button == 1:
+                self.clicked = False
+                return True
+        elif self.button_id and event.type == I2C_BUTTON_RELEASE_EVENT and hasattr(event, 'button_id'):
+            if event.button_id == self.button_id:
                 self.clicked = False
                 return True
         return False
